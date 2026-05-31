@@ -4,7 +4,7 @@ function App() {
 
   return (
     <>
-      <div className=''>Smart Student Dashboard</div>
+      <div className='text-4xl text-red-500'>Smart Student Dashboard</div>
     </>
   )
 }
