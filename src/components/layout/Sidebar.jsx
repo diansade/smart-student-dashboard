@@ -1,46 +1,94 @@
-import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 import {
-  FaBars,
-  FaHome,
-  FaTasks,
-  FaCalendarAlt,
-  FaBullseye,
-  FaBook,
-  FaCalculator,
-  FaLink,
-} from "react-icons/fa";
+  LayoutDashboard,
+  CheckSquare,
+  Target,
+  Calendar,
+  BookOpen,
+  Calculator,
+  Link,
+} from "lucide-react";
+
+const menuItems = [
+  {
+    name: "Dashboard",
+    path: "/",
+    icon: <LayoutDashboard size={20} />,
+  },
+  {
+    name: "Tasks",
+    path: "/tasks",
+    icon: <CheckSquare size={20} />,
+  },
+  {
+    name: "Goals",
+    path: "/goals",
+    icon: <Target size={20} />,
+  },
+  {
+    name: "Calendar",
+    path: "/calendar",
+    icon: <Calendar size={20} />,
+  },
+  {
+    name: "Study Tracker",
+    path: "/study",
+    icon: <BookOpen size={20} />,
+  },
+  {
+    name: "CGPA",
+    path: "/cgpa",
+    icon: <Calculator size={20} />,
+  },
+  {
+    name: "Resources",
+    path: "/resources",
+    icon: <Link size={20} />,
+  },
+];
 
 const Sidebar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   return (
-    <div
-      className={`${sidebarOpen ? "w-64" : "w-20"} duration-300 transition-all h-screen bg-slate-900 text-white`}
+    <aside
+      className="
+      w-64
+      min-h-[78vh]
+      rounded-[2rem]
+      bg-[#EAF4EC]
+      p-5
+      shadow-sm
+      border border-[#DDE8DF]
+    "
     >
-      <div className="mb-8 p-4 flex justify-between items-center">
-        {sidebarOpen && <h1 className="text-3xl ">Smart Student Dashboard</h1>}
-        <button onClick={() => setSidebarOpen(!sidebarOpen)}>
-          {sidebarOpen ? "inside" : "outside"}
-        </button>
-      </div>
-      <nav className="flex flex-col gap-4">
-        <NavLink to="/">Dashboard</NavLink>
+      <nav className="flex flex-col gap-2">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            className={({ isActive }) =>
+              `
+              flex items-center gap-4
+              rounded-2xl px-4 py-4
+              text-zinc-700
+              transition-all duration-200
+              hover:bg-white hover:text-zinc-900
+              
+              ${
+                isActive
+                  ? "bg-white text-emerald-700 shadow-sm font-medium"
+                  : ""
+              }
+            `
+            }
+          >
+            {item.icon}
 
-        <NavLink to="/tasks">Tasks</NavLink>
-
-        <NavLink to="/goals">Goals</NavLink>
-
-        <NavLink to="/calendar">Calendar</NavLink>
-
-        <NavLink to="/study">Study Tracker</NavLink>
-
-        <NavLink to="/cgpa">CGPA</NavLink>
-
-        <NavLink to="/resources">Resources</NavLink>
+            <span className="text-[15px]">{item.name}</span>
+          </NavLink>
+        ))}
       </nav>
-    </div>
+    </aside>
   );
 };
 
