@@ -1,11 +1,40 @@
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import MiniCalendar from "./MiniCalendar";
+import { getWeeklyHours } from "../utils/studyUtils";
+import { getCGPA, getTotalCredits } from "../utils/cgpaUtils";
+
 const Dashboard = () => {
+  const [tasks, setTasks] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [studySessions, setStudySessions] = useState([]);
+  const [semesters, setSemesters] = useState([]);
+
+  useEffect(() => {
+    setTasks(JSON.parse(localStorage.getItem("tasks")) || []);
+    setGoals(JSON.parse(localStorage.getItem("goals")) || []);
+    setStudySessions(JSON.parse(localStorage.getItem("studySessions")) || []);
+    setSemesters(JSON.parse(localStorage.getItem("cgpa")) || []);
+  }, []);
+
+  const completedTasks = tasks.filter((task) => task.completed).length;
+
+  const pendingTasks = tasks.filter((task) => !task.completed);
+
+  const todayTasks = pendingTasks.slice(0, 3);
+
+  const totalTasks = tasks.length;
+
+  const weeklyHours = getWeeklyHours(studySessions);
+
+  const cgpa = getCGPA(semesters);
+  const totalCredits = getTotalCredits(semesters);
+
   return (
     <div className="space-y-5">
       {/* Greeting */}
       <section>
-        <h1 className="text-2xl font-semibold text-zinc-800">
-          Welcome back, Dibakar 👋
-        </h1>
+        <h1 className="text-2xl font-semibold text-zinc-800">Welcome back👋</h1>
 
         <p className="mt-1 text-zinc-500">Stay productive and keep learning.</p>
       </section>
@@ -29,12 +58,17 @@ const Dashboard = () => {
               <p className="text-zinc-500 text-sm">Tasks Completed</p>
 
               <div className="mt-3 flex items-end gap-2">
-                <h2 className="text-4xl font-semibold text-zinc-800">12</h2>
+                <h2 className="text-4xl font-semibold text-zinc-800">
+                  {completedTasks}
+                </h2>
 
-                <span className="pb-1 text-zinc-500">/ 18</span>
+                <span className="pb-1 text-zinc-500">/ {totalTasks}</span>
               </div>
-
-              <p className="mt-2 text-emerald-700 text-sm">+12% this week</p>
+              <p className="mt-2 text-sm text-emerald-700">
+                {completedTasks === totalTasks && totalTasks > 0
+                  ? "All tasks completed 🎉"
+                  : `${totalTasks - completedTasks} remaining`}
+              </p>
             </div>
 
             {/* Study Hours */}
@@ -50,7 +84,7 @@ const Dashboard = () => {
               <p className="text-zinc-500 text-sm">Study Hours</p>
 
               <h2 className="mt-3 text-4xl font-semibold text-zinc-800">
-                14.5 hrs
+                {weeklyHours} hrs
               </h2>
 
               <p className="mt-2 text-violet-700 text-sm">This week</p>
@@ -88,85 +122,92 @@ const Dashboard = () => {
                 text-emerald-700
               "
               >
-                3 Tasks
+                {todayTasks.length} Tasks
               </span>
             </div>
-
-            {/* Task List */}
+            {/* Task List */}{" "}
             <div className="mt-6 space-y-4">
-              {/* Task 1 */}
-              <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-zinc-800">
-                      Complete React Revision
-                    </h3>
-
-                    <p className="mt-1 text-sm text-zinc-500">
-                      Frontend Development
-                    </p>
-                  </div>
-
-                  <span className="font-medium text-orange-500">High</span>
+              {" "}
+              {todayTasks.length === 0 ? (
+                <div className="py-12 text-center text-zinc-500">
+                  {" "}
+                  No pending tasks 🎉{" "}
                 </div>
-              </div>
-
-              {/* Task 2 */}
-              <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-zinc-800">
-                      Practice DSA Problems
-                    </h3>
-
-                    <p className="mt-1 text-sm text-zinc-500">
-                      LeetCode Practice
-                    </p>
+              ) : (
+                todayTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="rounded-[1.5rem] border border-stone-200 bg-white p-5"
+                  >
+                    {" "}
+                    <div className="flex items-center justify-between">
+                      {" "}
+                      <div>
+                        {" "}
+                        <h3 className="font-medium text-zinc-800">
+                          {" "}
+                          {task.taskName}{" "}
+                        </h3>{" "}
+                        <p className="mt-1 text-sm text-zinc-500">
+                          {" "}
+                          {task.taskSubject || "No Subject"}{" "}
+                        </p>{" "}
+                      </div>{" "}
+                      <span
+                        className={`font-medium ${task.priority === "High" ? "text-orange-500" : task.priority === "Medium" ? "text-emerald-600" : "text-blue-500"}`}
+                      >
+                        {" "}
+                        {task.priority}{" "}
+                      </span>{" "}
+                    </div>{" "}
                   </div>
-
-                  <span className="font-medium text-emerald-600">Medium</span>
-                </div>
-              </div>
-
-              {/* Task 3 */}
-              <div className="rounded-[1.5rem] border border-stone-200 bg-white p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-zinc-800">
-                      Read 20 Pages of DBMS
-                    </h3>
-
-                    <p className="mt-1 text-sm text-zinc-500">
-                      Database Systems
-                    </p>
-                  </div>
-
-                  <span className="font-medium text-blue-500">Low</span>
-                </div>
-              </div>
+                ))
+              )}{" "}
             </div>
-
             {/* View All Button */}
-            <button
+            <Link
+              to="/tasks"
               className="
-              mt-6
-              w-full
-              rounded-[1.5rem]
-              bg-emerald-50
-              py-4
-              font-medium
-              text-emerald-700
-              transition
-              hover:bg-emerald-100
-            "
+    mt-6
+    block
+    w-full
+    rounded-[1.5rem]
+    bg-emerald-50
+    py-4
+    text-center
+    font-medium
+    text-emerald-700
+    transition
+    hover:bg-emerald-100
+  "
             >
               View All Tasks
-            </button>
+            </Link>
           </div>
         </div>
 
         {/* RIGHT SIDE */}
         <div className="space-y-5">
+          {/* CGPA */}
+          <div
+            className="
+    rounded-[2rem]
+    bg-amber-50
+    border border-amber-100
+    p-6
+    h-36
+  "
+          >
+            <p className="text-zinc-500 text-sm">Current CGPA</p>
+
+            <h2 className="mt-3 text-4xl font-semibold text-zinc-800">
+              {cgpa}
+            </h2>
+
+            <p className="mt-2 text-sm text-amber-700">
+              {totalCredits} Credits • {semesters.length} Semesters
+            </p>
+          </div>
           {/* Calendar */}
           <div
             className="
@@ -174,69 +215,10 @@ const Dashboard = () => {
             bg-white
             border border-stone-200
             p-6
-            h-[330px]
+            h-[360px]
           "
           >
-            <h2 className="text-xl font-semibold text-zinc-800">Calendar</h2>
-          </div>
-
-          {/* Goals */}
-          <div
-            className="
-            rounded-[2rem]
-            bg-white
-            border border-stone-200
-            p-6
-            h-[275px]
-          "
-          >
-            <h2 className="text-xl font-semibold text-zinc-800">Goals</h2>
-
-            <div className="mt-6 space-y-5">
-              {/* Weekly Goal */}
-              <div>
-                <div className="flex justify-between">
-                  <span className="font-medium text-zinc-700">Weekly Goal</span>
-
-                  <span className="text-sm text-zinc-500">75%</span>
-                </div>
-
-                <div className="mt-2 h-3 rounded-full bg-stone-200">
-                  <div className="h-3 w-[75%] rounded-full bg-emerald-500"></div>
-                </div>
-              </div>
-
-              {/* Monthly Goal */}
-              <div>
-                <div className="flex justify-between">
-                  <span className="font-medium text-zinc-700">
-                    Monthly Goal
-                  </span>
-
-                  <span className="text-sm text-zinc-500">60%</span>
-                </div>
-
-                <div className="mt-2 h-3 rounded-full bg-stone-200">
-                  <div className="h-3 w-[60%] rounded-full bg-violet-500"></div>
-                </div>
-              </div>
-            </div>
-
-            <button
-              className="
-              mt-6
-              w-full
-              rounded-[1.5rem]
-              bg-emerald-50
-              py-3
-              font-medium
-              text-emerald-700
-              hover:bg-emerald-100
-              transition
-            "
-            >
-              View All Goals
-            </button>
+            <MiniCalendar date={new Date()} />
           </div>
         </div>
       </section>

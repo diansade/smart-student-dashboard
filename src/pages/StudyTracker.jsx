@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getWeeklyHours } from "../utils/studyUtils";
 
 const StudyTracker = () => {
   const [showModal, setShowModal] = useState(false);
@@ -93,7 +94,7 @@ const StudyTracker = () => {
     .filter((session) => new Date(session.date) >= startOfWeek)
     .reduce((sum, session) => sum + session.minutes, 0);
 
-  const weeklyHours = (weeklyMinutes / 60).toFixed(1);
+ const weeklyHours = getWeeklyHours(sessions);
 
   const today = new Date();
 

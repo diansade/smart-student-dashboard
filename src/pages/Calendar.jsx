@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getWeeklyHours } from "../utils/studyUtils";
 import MiniCalendar from "./MiniCalendar";
 
 const Calendar = () => {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getCGPA, getTotalCredits, getSemesterCount } from "../utils/cgpaUtils";
 
 const CGPA = () => {
   const [showModal, setShowModal] = useState(false);
@@ -78,15 +79,9 @@ const CGPA = () => {
     setShowModal(false);
   };
 
-  const totalCredits = semesters.reduce((sum, sem) => sum + sem.credit, 0);
-
-  const cgpa =
-    totalCredits === 0
-      ? 0
-      : (
-          semesters.reduce((sum, sem) => sum + sem.sgpa * sem.credit, 0) /
-          totalCredits
-        ).toFixed(2);
+  const totalCredits = getTotalCredits(semesters);
+  const cgpa = getCGPA(semesters);
+  const semesterCount = getSemesterCount(semesters);
 
   return (
     <div className="space-y-6">
@@ -159,7 +154,7 @@ const CGPA = () => {
           <p className="text-sm text-zinc-500">Semesters</p>
 
           <h2 className="mt-3 text-3xl font-semibold text-zinc-800">
-            {semesters.length}
+            {semesterCount}
           </h2>
         </div>
       </section>
