@@ -130,15 +130,17 @@ transition-all duration-300
         {/* Today's Tasks */}
         <div
           className="
-            order-5
-            xl:col-span-2
-            md:col-span-2
-            rounded-[2rem]
-            bg-stone-50
-            border border-stone-200
-            p-6
-            h-[505px]
-          "
+order-5
+xl:col-span-2
+md:col-span-2
+rounded-[2rem]
+bg-stone-50
+border border-stone-200
+p-6
+min-h-[250px]
+flex
+flex-col
+"
         >
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -165,15 +167,16 @@ transition-all duration-300
             </span>
           </div>
           {/* Task List */}{" "}
-          <div className="mt-6 space-y-4">
+          <div className="mt-6 flex-1">
             {" "}
             {todayTasks.length === 0 ? (
-              <div className="py-12 text-center text-zinc-500">
+              <div className="h-full flex items-center justify-center text-zinc-500">
                 {" "}
                 No pending tasks 🎉{" "}
               </div>
             ) : (
-              todayTasks.map((task) => (
+              <div className="space-y-4" >
+               {todayTasks.map((task) => (
                 <div
                   key={task.id}
                   className="rounded-[1.5rem] border border-stone-200 bg-white p-5"
@@ -200,8 +203,10 @@ transition-all duration-300
                     </span>{" "}
                   </div>{" "}
                 </div>
-              ))
-            )}{" "}
+              ))}
+              </div>
+            )
+            }{" "}
           </div>
           {/* View All Button */}
           <Link

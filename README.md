@@ -59,7 +59,10 @@ A modern and responsive **Student Productivity Dashboard** built with **React** 
 
 ## 🌐 Live Demo
 
-🔗 add live link
+🔗 https://smart-student-dashboard-six.vercel.app/
+
+
+
 
 ## 🛠️ Tech Stack
 
