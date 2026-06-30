@@ -156,7 +156,7 @@ const Tasks = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-800">Tasks</h1>
 
@@ -165,7 +165,7 @@ const Tasks = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={() => setShowArchive(true)}
             className="
@@ -199,7 +199,7 @@ const Tasks = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <button
           onClick={() => setFilter("All")}
           className={`
@@ -363,7 +363,9 @@ const Tasks = () => {
         >
           <div
             className="
-      w-full max-w-lg
+      w-full 
+      w-[95%]
+      max-w-lg
       rounded-[2rem]
       bg-white
       p-8
@@ -447,7 +449,7 @@ const Tasks = () => {
                   Priority
                 </label>
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
                     onClick={() => setPriority(priority === "Low" ? "" : "Low")}
@@ -504,7 +506,7 @@ const Tasks = () => {
             </div>
 
             {/* Footer */}
-            <div className="mt-8 flex justify-end gap-3">
+            <div className="mt-8 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
               <button
                 onClick={resetForm}
                 className="
@@ -540,13 +542,13 @@ const Tasks = () => {
     fixed inset-0
     bg-black/30
     backdrop-blur-sm
-    flex items-center justify-center
+    flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center
     z-50
   "
         >
           <div
             className="
-      w-full max-w-2xl
+      w-[95%] max-w-2xl
       rounded-[2rem]
       bg-white
       p-8

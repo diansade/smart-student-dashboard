@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 
 const Resources = () => {
   const [showModal, setShowModal] = useState(false);
@@ -65,7 +66,7 @@ const Resources = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-800">Resources</h1>
 
@@ -108,22 +109,30 @@ const Resources = () => {
               <div
                 key={resource.id}
                 className="
-    rounded-[1.5rem]
-    border border-stone-200
-    bg-white
-    p-5
-    flex items-center justify-between
-    "
+                  rounded-3xl
+                  border
+                  border-stone-200
+                  bg-white
+                  p-5
+                  flex
+                  flex-col
+                  gap-4
+                  sm:flex-row
+                  sm:items-center
+                  sm:justify-between
+                "
               >
                 <div>
                   <h3 className="font-medium">{resource.title}</h3>
 
                   <p className="mt-1 text-sm text-zinc-500 break-all">
-                    {resource.link}
+                    {resource.link.length > 45
+                      ? resource.link.slice(0, 45) + "..."
+                      : resource.link}
                   </p>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex justify-end gap-3">
                   <a
                     href={resource.link}
                     target="_blank"
@@ -140,7 +149,15 @@ const Resources = () => {
                   </a>
 
                   <button
-                    onClick={() => deleteResource(resource.id)}
+                    onClick={() => {
+                      const confirmDelete = window.confirm(
+                        "Are you sure you want to delete this resource?",
+                      );
+
+                      if (confirmDelete) {
+                        deleteResource(resource.id);
+                      }
+                    }}
                     className="
         rounded-xl
         bg-red-100
@@ -170,7 +187,7 @@ const Resources = () => {
         >
           <div
             className="
-      w-full max-w-lg
+      w-[95%] max-w-lg
       rounded-[2rem]
       bg-white
       p-8
@@ -180,7 +197,12 @@ const Resources = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold">Add New Resource</h2>
 
-              <button onClick={resetForm}>✕</button>
+              <button
+                onClick={resetForm}
+                className="p-2 rounded-full hover:bg-stone-100 transition"
+              >
+                <X size={20} />
+              </button>
             </div>
 
             <div className="mt-6 space-y-4">
@@ -232,7 +254,7 @@ const Resources = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 onClick={resetForm}
                 className="

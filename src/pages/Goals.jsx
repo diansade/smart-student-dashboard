@@ -72,7 +72,7 @@ const Goals = () => {
     setGoalTitleError("");
     setGoalType("");
     setGoalTypeError("");
-    setTargerError("");
+    setTargetError("");
     setTarget("");
     setShowModal(false);
   };
@@ -100,7 +100,7 @@ const Goals = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-800">Goals</h1>
 
@@ -124,7 +124,15 @@ const Goals = () => {
       </div>
 
       {/* Stats */}
-      <section className="grid grid-cols-3 gap-5">
+      <section
+        className="
+    grid
+    grid-cols-1
+    md:grid-cols-2
+    xl:grid-cols-3
+    gap-5
+  "
+      >
         {/* Total Goals */}
         <div
           className="
@@ -137,7 +145,7 @@ const Goals = () => {
         >
           <p className="text-sm text-zinc-500">Total Goals</p>
 
-          <h2 className="mt-3 text-4xl font-semibold text-zinc-800">
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-zinc-800">
             {goals.length}
           </h2>
         </div>
@@ -154,12 +162,12 @@ const Goals = () => {
         >
           <p className="text-sm text-zinc-500">Goals Completed</p>
 
-          <h2 className="mt-3 text-4xl font-semibold text-zinc-800">
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-zinc-800">
             {completedGoals}
           </h2>
         </div>
 
-        {/* Most Studied */}
+        {/* In progress goals */}
         <div
           className="
           rounded-[2rem]
@@ -171,7 +179,7 @@ const Goals = () => {
         >
           <p className="text-sm text-zinc-500">In Progress Goals</p>
 
-          <h2 className="mt-3 text-3xl font-semibold text-zinc-800">
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-zinc-800">
             {inProgressGoals}
           </h2>
         </div>
@@ -212,7 +220,7 @@ const Goals = () => {
   "
               >
                 {/* Header */}
-                <div className="flex items-start justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-zinc-800">
                       {goal.title}
@@ -244,7 +252,15 @@ const Goals = () => {
                     )}
 
                     <button
-                      onClick={() => deleteGoal(goal.id)}
+                      onClick={() => {
+                        const confirmDelete = window.confirm(
+                          "Are you sure you want to delete this goal?",
+                        );
+
+                        if (confirmDelete) {
+                          deleteGoal(goal.id);
+                        }
+                      }}
                       className="
           text-red-500
           hover:text-red-700
@@ -283,7 +299,7 @@ const Goals = () => {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-5 flex justify-between items-center">
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-zinc-500">
                     {Math.round((goal.progress / goal.target) * 100)}% completed
                   </p>
@@ -327,7 +343,7 @@ const Goals = () => {
         >
           <div
             className="
-      w-full max-w-lg
+      w-[95%] max-w-lg
       rounded-[2rem]
       bg-white
       p-8
@@ -368,7 +384,7 @@ const Goals = () => {
                     Goal Type
                   </label>
 
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
                       onClick={() =>
@@ -431,7 +447,7 @@ const Goals = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 onClick={resetForm}
                 className="

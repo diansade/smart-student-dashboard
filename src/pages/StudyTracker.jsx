@@ -94,7 +94,7 @@ const StudyTracker = () => {
     .filter((session) => new Date(session.date) >= startOfWeek)
     .reduce((sum, session) => sum + session.minutes, 0);
 
- const weeklyHours = getWeeklyHours(sessions);
+  const weeklyHours = getWeeklyHours(sessions);
 
   const today = new Date();
 
@@ -115,7 +115,7 @@ const StudyTracker = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-800">
             Study Tracker
@@ -143,7 +143,15 @@ const StudyTracker = () => {
       </div>
 
       {/* Stats */}
-      <section className="grid grid-cols-3 gap-5">
+      <section
+        className="
+    grid
+    grid-cols-1
+    md:grid-cols-2
+    xl:grid-cols-3
+    gap-5
+  "
+      >
         {/* Today's Total */}
         <div
           className="
@@ -156,11 +164,9 @@ const StudyTracker = () => {
         >
           <p className="text-sm text-zinc-500">Today's Total</p>
 
-          <h2 className="mt-3 text-4xl font-semibold text-zinc-800">
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-zinc-800">
             {todayHours} hrs
           </h2>
-
-          <p className="mt-2 text-sm text-emerald-700">Great progress today</p>
         </div>
 
         {/* Weekly Total */}
@@ -175,14 +181,14 @@ const StudyTracker = () => {
         >
           <p className="text-sm text-zinc-500">Weekly Total</p>
 
-          <h2 className="mt-3 text-4xl font-semibold text-zinc-800">
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-zinc-800">
             {weeklyHours} hrs
           </h2>
 
           <p className="mt-2 text-sm text-violet-700">This week</p>
         </div>
 
-        {/* Most Studied */}
+        {/* Total Sessions */}
         <div
           className="
           rounded-[2rem]
@@ -192,13 +198,11 @@ const StudyTracker = () => {
           h-36
         "
         >
-          <p className="text-sm text-zinc-500">Most Studied</p>
+          <p className="text-sm text-zinc-500">Total Sessions</p>
 
-          <h2 className="mt-3 text-3xl font-semibold text-zinc-800">
+          <h2 className="mt-3 text-3xl md:text-4xl font-semibold text-zinc-800">
             {sessions.length}
           </h2>
-
-          <p className="mt-2 text-sm text-amber-700">Total Sessions</p>
         </div>
       </section>
 
@@ -234,11 +238,15 @@ const StudyTracker = () => {
               <div
                 key={session.id}
                 className="
-        rounded-[1.5rem]
-        border border-stone-200
-        bg-white
-        p-5
-        flex items-center justify-between
+       rounded-[1.5rem]
+border border-stone-200
+bg-white
+p-5
+flex flex-col
+gap-4
+sm:flex-row
+sm:items-center
+sm:justify-between
       "
               >
                 <div>
@@ -279,7 +287,7 @@ const StudyTracker = () => {
         >
           <div
             className="
-      w-full max-w-lg
+      w-[95%] max-w-lg
       rounded-[2rem]
       bg-white
       p-8
@@ -312,7 +320,7 @@ const StudyTracker = () => {
                 )}
               </div>
               <div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="number"
                     placeholder="Hours"
@@ -345,7 +353,16 @@ const StudyTracker = () => {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div
+              className="
+    mt-6
+    flex
+    flex-col-reverse
+    gap-3
+    sm:flex-row
+    sm:justify-end
+  "
+            >
               <button
                 onClick={resetForm}
                 className="
