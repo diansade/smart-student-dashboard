@@ -38,8 +38,8 @@ const Login = () => {
       }
 
       login(data.token, data.user);
-
-      navigate("/");
+      console.log("Navigating to dashboard");
+      navigate("/dashboard");
       
     } catch (error) {
       setError(error.message);
@@ -49,12 +49,20 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-xl shadow-md">
-        <h1 className="text-3xl font-bold text-center mb-2">Welcome Back</h1>
+    <div className="min-h-screen flex items-center justify-center bg-[#f7f8f5] px-4">
+      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-gray-200 shadow-sm">
+        <div className="text-center mb-8">
+          <div className="text-2xl font-bold text-[#0f172a]">
+            🎓 Student Dashboard
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Your personal academic workspace
+          </p>
+        </div>
+        <h1 className="text-3xl font-bold text-center mb-2">Welcome back 👋</h1>
 
         <p className="text-gray-500 text-center mb-6">
-          Login to your student dashboard
+          Sign in to continue to your dashboard
         </p>
 
         {error && (
@@ -72,7 +80,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition"
               placeholder="Enter your email"
             />
           </div>
@@ -85,7 +93,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2"
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition"
               placeholder="Enter your password"
             />
           </div>
@@ -93,7 +101,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-2 rounded-lg"
+            className="w-full bg-[#10b981] hover:bg-[#059669] text-white py-2.5 rounded-xl font-medium transition-colors"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -101,7 +109,10 @@ const Login = () => {
 
         <p className="text-center mt-6 text-gray-600">
           Don't have an account?{" "}
-          <Link to="/register" className="font-semibold underline">
+          <Link
+            to="/register"
+            className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+          >
             Register
           </Link>
         </p>

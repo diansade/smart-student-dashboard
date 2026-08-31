@@ -15,37 +15,37 @@ import {
 const menuItems = [
   {
     name: "Dashboard",
-    path: "/",
+    path: "/dashboard",
     icon: <LayoutDashboard size={20} />,
   },
   {
     name: "Tasks",
-    path: "/tasks",
+    path: "/dashboard/tasks",
     icon: <CheckSquare size={20} />,
   },
   {
     name: "Goals",
-    path: "/goals",
+    path: "/dashboard/goals",
     icon: <Target size={20} />,
   },
   {
     name: "Calendar",
-    path: "/calendar",
+    path: "/dashboard/calendar",
     icon: <Calendar size={20} />,
   },
   {
     name: "Study Tracker",
-    path: "/study",
+    path: "/dashboard/study",
     icon: <BookOpen size={20} />,
   },
   {
     name: "CGPA",
-    path: "/cgpa",
+    path: "/dashboard/cgpa",
     icon: <Calculator size={20} />,
   },
   {
     name: "Resources",
-    path: "/resources",
+    path: "/dashboard/resources",
     icon: <Link size={20} />,
   },
 ];
