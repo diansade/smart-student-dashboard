@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Bell, Moon, ChevronDown } from "lucide-react";
 import { PiStudentBold } from "react-icons/pi";
 import { HiOutlineMenu } from "react-icons/hi";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
+  const { user, logout } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
   return (
     <header className="px-3 sm:px-4 lg:px-6 pt-3 lg:pt-4">
       <div
@@ -51,20 +56,42 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
           {/* Profile */}
           <div className="flex items-center gap-2">
-            <div
-              className="
-              w-8 h-8 sm:w-9 sm:h-9
-              rounded-full
-              bg-emerald-100
-              flex items-center justify-center
-              font-semibold
-              text-emerald-700
-            "
-            >
-              D
-            </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="flex items-center gap-2"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-medium">
+                  {user?.name?.charAt(0).toUpperCase() || "D"}
+                </div>
 
-            <ChevronDown size={18} className="text-zinc-600" />
+                <ChevronDown size={18} className="text-zinc-600" />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg border py-2 z-50">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      navigate("/profile");
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50"
+                  >
+                    👤 Profile
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate("/login");
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 text-red-600"
+                  >
+                    🚪 Sign Out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
