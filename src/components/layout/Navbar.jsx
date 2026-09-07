@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Bell, Moon, ChevronDown } from "lucide-react";
+import { Search, Bell, Moon, ChevronDown, User, LogOut } from "lucide-react";
 import { PiStudentBold } from "react-icons/pi";
 import { HiOutlineMenu } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
@@ -69,25 +69,24 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg border py-2 z-50">
+                <div className="absolute right-0 mt-3 w-52 bg-white rounded-2xl border border-stone-200 shadow-lg p-2 z-50">
                   <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      navigate("/profile");
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50"
+                    onClick={() => navigate("/dashboard/profile")}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#0f172a] hover:bg-emerald-50 transition-colors"
                   >
-                    👤 Profile
+                    <User size={19} className="text-emerald-600" />
+                    <span className="font-medium">Profile</span>
                   </button>
 
                   <button
                     onClick={() => {
                       logout();
-                      navigate("/login");
+                      window.location.href = "/";
                     }}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50 text-red-600"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
                   >
-                    🚪 Sign Out
+                    <LogOut size={19} />
+                    <span className="font-medium">Sign Out</span>
                   </button>
                 </div>
               )}

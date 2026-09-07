@@ -3,6 +3,7 @@ const User = require("../models/User");
 
 const jwt = require("jsonwebtoken");
 
+
 const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -41,6 +42,8 @@ const registerUser = async (req, res) => {
         });
     }
 };
+
+
 
 const loginUser = async (req, res) => {
     try {
