@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getWeeklyHours } from "../utils/studyUtils";
+import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
 
 const StudyTracker = () => {
   const [showModal, setShowModal] = useState(false);
@@ -14,16 +15,36 @@ const StudyTracker = () => {
 
   const [timeError, setTimeError] = useState("");
 
-  const [sessions, setSessions] = useState(() => {
-    const saved = localStorage.getItem("studySessions");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [sessions, setSessions] = useState([]);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState(null);
+
+  const fetchSessions = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/study-sessions", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch sessions");
+      }
+
+      setSessions(data);
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("studySessions", JSON.stringify(sessions));
-  }, [sessions]);
+    fetchSessions();
+  }, []);
 
-  const addSession = () => {
+  const addSession = async () => {
     setSubjectError("");
     setTimeError("");
 
@@ -43,24 +64,60 @@ const StudyTracker = () => {
 
     if (!valid) return;
 
-    const newSession = {
-      id: Date.now(),
-      subject: subject.trim(),
-      minutes: totalMinutes,
-      date: new Date().toISOString(),
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/study-sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          subject: subject.trim(),
+          minutes: totalMinutes,
+        }),
+      });
 
-    setSessions((prev) => [...prev, newSession]);
+      const data = await response.json();
 
-    setSubject("");
-    setHours("");
-    setMinutes("");
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create session");
+      }
 
-    setShowModal(false);
+      setSessions((prevSessions) => [...prevSessions, data.session]);
+
+      setSubject("");
+      setHours("");
+      setMinutes("");
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error creating session:", error);
+    }
   };
 
-  const deleteSession = (id) => {
-    setSessions((prev) => prev.filter((session) => session.id !== id));
+  const deleteSession = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/study-sessions/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete session");
+      }
+
+      setSessions((prevSessions) =>
+        prevSessions.filter((session) => session._id !== id),
+      );
+    } catch (error) {
+      console.error("Error deleting session:", error);
+    }
   };
 
   const resetForm = () => {
@@ -111,6 +168,28 @@ const StudyTracker = () => {
     .reduce((sum, session) => sum + session.minutes, 0);
 
   const todayHours = (todayMinutes / 60).toFixed(1);
+
+  const groupedSessions = sessions.reduce((groups, session) => {
+    const date = new Date(session.date);
+
+    const dateKey = date.toLocaleDateString("en-CA");
+
+    if (!groups[dateKey]) {
+      groups[dateKey] = [];
+    }
+
+    groups[dateKey].push(session);
+
+    return groups;
+  }, {});
+
+  const formatSessionDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -228,47 +307,60 @@ const StudyTracker = () => {
           </div>
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-8">
           {sessions.length === 0 ? (
             <div className="text-center text-zinc-500 py-10">
               No study sessions added yet
             </div>
           ) : (
-            sessions.map((session) => (
-              <div
-                key={session.id}
-                className="
-       rounded-[1.5rem]
-border border-stone-200
-bg-white
-p-5
-flex flex-col
-gap-4
-sm:flex-row
-sm:items-center
-sm:justify-between
-      "
-              >
-                <div>
-                  <h3 className="font-medium text-zinc-800">
-                    {session.subject}
-                  </h3>
+            Object.entries(groupedSessions).map(([date, dateSessions]) => (
+              <div key={date}>
+                <h3 className="text-base font-semibold text-zinc-800 mb-3">
+                  {formatSessionDate(date)}
+                </h3>
 
-                  <p className="mt-1 text-sm text-zinc-500">
-                    {formatTime(session.minutes)}
-                  </p>
+                <div className="space-y-3">
+                  {dateSessions.map((session) => (
+                    <div
+                      key={session._id}
+                      className="
+                rounded-[1.5rem]
+                border border-stone-200
+                bg-white
+                p-5
+                flex flex-col
+                gap-4
+                sm:flex-row
+                sm:items-center
+                sm:justify-between
+              "
+                    >
+                      <div>
+                        <h4 className="font-medium text-zinc-800">
+                          {session.subject}
+                        </h4>
+
+                        <p className="mt-1 text-sm text-zinc-500">
+                          {formatTime(session.minutes)}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setSessionToDelete(session);
+                          setShowDeleteConfirm(true);
+                        }}
+                        className="
+                  text-red-500
+                  hover:text-red-700
+                  transition
+                "
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ))}
                 </div>
-
-                <button
-                  onClick={() => deleteSession(session.id)}
-                  className="
-          text-red-500
-          hover:text-red-700
-          transition
-        "
-                >
-                  Delete
-                </button>
               </div>
             ))
           )}
@@ -391,6 +483,22 @@ sm:justify-between
           </div>
         </div>
       )}
+
+      {/* Delete Modal */}
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Study Session?"
+        itemName={sessionToDelete?.subject}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setSessionToDelete(null);
+        }}
+        onConfirm={() => {
+          deleteSession(sessionToDelete._id);
+          setShowDeleteConfirm(false);
+          setSessionToDelete(null);
+        }}
+      />
     </div>
   );
 };

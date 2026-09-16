@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
 
 const Goals = () => {
   const [showModal, setShowModal] = useState(false);
@@ -546,56 +547,16 @@ const Goals = () => {
       )}
 
       {/* Delete Modal */}
-      {showDeleteConfirm && goalToDelete && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl p-8 w-[95%] max-w-md shadow-xl relative">
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={() => {
-                setShowDeleteConfirm(false);
-                setGoalToDelete(null);
-              }}
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
-            >
-              <X size={20} />
-            </button>
-
-            <h2 className="text-xl font-semibold text-slate-900">
-              Delete Goal?
-            </h2>
-
-            <p className="text-sm text-slate-600 mt-2">
-              Are you sure you want to permanently delete{" "}
-              <span className="font-medium text-slate-900">
-                "{goalToDelete.title}"
-              </span>
-              ?
-            </p>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setGoalToDelete(null);
-                }}
-                className="px-4 py-2 rounded-xl border border-stone-200 text-slate-700 hover:bg-stone-50 transition-colors"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={() => deleteGoal(goalToDelete._id)}
-                className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Goal?"
+        itemName={goalToDelete?.title}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setGoalToDelete(null);
+        }}
+        onConfirm={() => deleteGoal(goalToDelete._id)}
+      />
     </div>
   );
 };

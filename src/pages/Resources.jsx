@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
 
 const Resources = () => {
   const [showModal, setShowModal] = useState(false);
@@ -12,17 +13,35 @@ const Resources = () => {
 
   const [resourceLinkError, setResourceLinkError] = useState("");
 
-  const [resources, setResources] = useState(() => {
-    const saved = localStorage.getItem("resources");
+  const [resources, setResources] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState(null);
 
-    return saved ? JSON.parse(saved) : [];
-  });
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    localStorage.setItem("resources", JSON.stringify(resources));
-  }, [resources]);
+    const fetchResources = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/resources", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const addResource = () => {
+        const data = await response.json();
+
+        if (response.ok) {
+          setResources(data);
+        }
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      }
+    };
+
+    fetchResources();
+  }, []);
+
+  const addResource = async () => {
     setResourceTitleError("");
     setResourceLinkError("");
 
@@ -40,19 +59,55 @@ const Resources = () => {
 
     if (!valid) return;
 
-    const newResource = {
-      id: Date.now(),
-      title: resourceTitle.trim(),
-      link: resourceLink.trim(),
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/resources", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: resourceTitle.trim(),
+          link: resourceLink.trim(),
+        }),
+      });
 
-    setResources((prev) => [...prev, newResource]);
+      const data = await response.json();
 
-    resetForm();
+      if (!response.ok) {
+        setResourceTitleError(data.message || "Failed to add resource");
+        return;
+      }
+
+      setResources((prev) => [...prev, data.resource]);
+
+      resetForm();
+    } catch (error) {
+      console.error("Error adding resource:", error);
+    }
   };
 
-  const deleteResource = (id) => {
-    setResources((prev) => prev.filter((resource) => resource.id !== id));
+  const deleteResource = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/resources/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        console.error("Failed to delete resource");
+        return;
+      }
+
+      setResources((prev) => prev.filter((resource) => resource._id !== id));
+    } catch (error) {
+      console.error("Error deleting resource:", error);
+    }
   };
 
   const resetForm = () => {
@@ -107,7 +162,7 @@ const Resources = () => {
           ) : (
             resources.map((resource) => (
               <div
-                key={resource.id}
+                key={resource._id}
                 className="
                   rounded-3xl
                   border
@@ -150,20 +205,15 @@ const Resources = () => {
 
                   <button
                     onClick={() => {
-                      const confirmDelete = window.confirm(
-                        "Are you sure you want to delete this resource?",
-                      );
-
-                      if (confirmDelete) {
-                        deleteResource(resource.id);
-                      }
+                      setResourceToDelete(resource);
+                      setShowDeleteConfirm(true);
                     }}
                     className="
-        rounded-xl
-        bg-red-100
-        px-4 py-2
-        text-red-600
-        "
+    rounded-xl
+    bg-red-100
+    px-4 py-2
+    text-red-600
+  "
                   >
                     Delete
                   </button>
@@ -283,6 +333,21 @@ const Resources = () => {
           </div>
         </div>
       )}
+
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Resource?"
+        itemName={resourceToDelete?.title}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setResourceToDelete(null);
+        }}
+        onConfirm={() => {
+          deleteResource(resourceToDelete._id);
+          setShowDeleteConfirm(false);
+          setResourceToDelete(null);
+        }}
+      />
     </div>
   );
 };

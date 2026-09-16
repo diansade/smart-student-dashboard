@@ -10,6 +10,9 @@ const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const goalRoutes = require("./routes/goalRoutes");
+const studySessionRoutes = require("./routes/studySessionRoutes");
+const semesterRoutes = require("./routes/semesterRoutes");
+const resourceRoutes = require("./routes/resourceRoutes");
 
 dotenv.config();
 
@@ -24,6 +27,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/goals", goalRoutes);
+app.use("/api/study-sessions", studySessionRoutes);
+app.use("/api/semesters", semesterRoutes);
+app.use("/api/resources", resourceRoutes);
 
 app.get("/", (req, res) => {
     res.json({

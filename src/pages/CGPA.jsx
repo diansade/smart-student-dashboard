@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getCGPA, getTotalCredits, getSemesterCount } from "../utils/cgpaUtils";
+import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
 
 const CGPA = () => {
   const [showModal, setShowModal] = useState(false);
@@ -12,16 +13,36 @@ const CGPA = () => {
   const [sgpaError, setSgpaError] = useState("");
   const [creditError, setCreditError] = useState("");
 
-  const [semesters, setSemesters] = useState(() => {
-    const saved = localStorage.getItem("cgpa");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [semesters, setSemesters] = useState([]);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [semesterToDelete, setSemesterToDelete] = useState(null);
+
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    localStorage.setItem("cgpa", JSON.stringify(semesters));
-  }, [semesters]);
+    const fetchSemesters = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/semesters", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  const addSemester = () => {
+        const data = await response.json();
+
+        if (response.ok) {
+          setSemesters(data);
+        }
+      } catch (error) {
+        console.error("Error fetching semesters:", error);
+      }
+    };
+
+    fetchSemesters();
+  }, []);
+
+  const addSemester = async () => {
     let valid = true;
 
     setSemError("");
@@ -46,6 +67,7 @@ const CGPA = () => {
       setSgpaError("SGPA must be between 0 and 10");
       valid = false;
     }
+
     if (!credit) {
       setCreditError("Enter Credit");
       valid = false;
@@ -53,20 +75,56 @@ const CGPA = () => {
 
     if (!valid) return;
 
-    const newSemester = {
-      id: Date.now(),
-      semester: Number(semester),
-      sgpa: Number(sgpa),
-      credit: Number(credit),
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/semesters", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          semester: Number(semester),
+          sgpa: Number(sgpa),
+          credit: Number(credit),
+        }),
+      });
 
-    setSemesters((prev) => [...prev, newSemester]);
+      const data = await response.json();
 
-    resetForm();
+      if (!response.ok) {
+        setSemError(data.message || "Failed to add semester");
+        return;
+      }
+
+      setSemesters((prev) => [...prev, data.semester]);
+
+      resetForm();
+    } catch (error) {
+      console.error("Error adding semester:", error);
+    }
   };
 
-  const deleteSemester = (id) => {
-    setSemesters((prev) => prev.filter((sem) => sem.id !== id));
+  const deleteSemester = async (id) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/semesters/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        console.error("Failed to delete semester");
+        return;
+      }
+
+      setSemesters((prev) => prev.filter((sem) => sem._id !== id));
+    } catch (error) {
+      console.error("Error deleting semester:", error);
+    }
   };
 
   const resetForm = () => {
@@ -185,7 +243,7 @@ const CGPA = () => {
               .sort((a, b) => a.semester - b.semester)
               .map((semester) => (
                 <div
-                  key={semester.id}
+                  key={semester._id}
                   className="
     rounded-[1.5rem]
     border border-stone-200
@@ -210,12 +268,14 @@ const CGPA = () => {
                     </div>
 
                     <button
-                      onClick={() => deleteSemester(semester.id)}
-                      className="
-          text-red-500
-          hover:text-red-700
-          transition
-          "
+                      onClick={() => {
+                        setSemesterToDelete(semester);
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="text-red-500
+                                hover:text-red-700
+                                transition
+                              "
                     >
                       Delete
                     </button>
@@ -351,6 +411,21 @@ const CGPA = () => {
           </div>
         </div>
       )}
+
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Semester?"
+        itemName={`Semester ${semesterToDelete?.semester}`}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setSemesterToDelete(null);
+        }}
+        onConfirm={() => {
+          deleteSemester(semesterToDelete._id);
+          setShowDeleteConfirm(false);
+          setSemesterToDelete(null);
+        }}
+      />
     </div>
   );
 };
