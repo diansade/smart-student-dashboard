@@ -169,22 +169,49 @@ const StudyTracker = () => {
 
   const todayHours = (todayMinutes / 60).toFixed(1);
 
-  const groupedSessions = sessions.reduce((groups, session) => {
-    const date = new Date(session.date);
+  const groupedSessions = [...sessions]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .reduce((groups, session) => {
+      const date = new Date(session.date);
 
-    const dateKey = date.toLocaleDateString("en-CA");
+      const dateKey = date.toLocaleDateString("en-CA");
 
-    if (!groups[dateKey]) {
-      groups[dateKey] = [];
-    }
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
 
-    groups[dateKey].push(session);
+      groups[dateKey].push(session);
 
-    return groups;
-  }, {});
+      return groups;
+    }, {});
 
   const formatSessionDate = (date) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    const sessionDate = new Date(date);
+    const today = new Date();
+
+    const sessionDay = new Date(
+      sessionDate.getFullYear(),
+      sessionDate.getMonth(),
+      sessionDate.getDate(),
+    );
+
+    const todayDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    const diffInDays = (todayDay - sessionDay) / (1000 * 60 * 60 * 24);
+
+    if (diffInDays === 0) {
+      return "Today";
+    }
+
+    if (diffInDays === 1) {
+      return "Yesterday";
+    }
+
+    return sessionDate.toLocaleDateString("en-US", {
       weekday: "long",
       month: "short",
       day: "numeric",

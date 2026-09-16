@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Bell, Moon, ChevronDown, User, LogOut } from "lucide-react";
 import { PiStudentBold } from "react-icons/pi";
@@ -8,7 +8,26 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
   const { user, logout } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const profileMenuRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="px-3 sm:px-4 lg:px-6 pt-3 lg:pt-4">
       <div
@@ -56,7 +75,7 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
           {/* Profile */}
           <div className="flex items-center gap-2">
-            <div className="relative">
+            <div ref={profileMenuRef} className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
                 className="flex items-center gap-2"
@@ -71,7 +90,10 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
               {showMenu && (
                 <div className="absolute right-0 mt-3 w-52 bg-white rounded-2xl border border-stone-200 shadow-lg p-2 z-50">
                   <button
-                    onClick={() => navigate("/dashboard/profile")}
+                    onClick={() => {
+                      setShowMenu(false);
+                      navigate("/dashboard/profile");
+                    }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#0f172a] hover:bg-emerald-50 transition-colors"
                   >
                     <User size={19} className="text-emerald-600" />

@@ -106,25 +106,27 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           <NavLink
             key={item.name}
             to={item.path}
-            onClick={() => setSidebarOpen(false)}
+            onClick={(e) => {
+              e.currentTarget.blur();
+            }}
             className={({ isActive }) =>
               `
-              flex items-center gap-4
-              rounded-2xl px-4 py-4
-              text-zinc-700
-              transition-all duration-200
-              hover:bg-emerald-50 hover:text-zinc-900
-              
-              ${
-                isActive
-                  ? "bg-emerald-50 text-emerald-700 font-medium border border-emerald-100"
-                  : ""
-              }
-            `
+    flex items-center gap-4
+    rounded-2xl px-4 py-4
+    text-zinc-700
+    transition-colors duration-200
+    hover:bg-emerald-50 hover:text-zinc-900
+    focus:outline-none
+
+    ${
+      isActive
+        ? "bg-emerald-50 text-emerald-700 font-medium border border-emerald-100"
+        : ""
+    }
+  `
             }
           >
             {item.icon}
-
             <span className="text-[15px]">{item.name}</span>
           </NavLink>
         ))}
