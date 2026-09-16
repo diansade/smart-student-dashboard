@@ -47,38 +47,6 @@ const Login = () => {
     }
   };
 
-  //Dev Login
-  const handleDevLogin = async () => {
-    setError("");
-    setLoading(true);
-
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: "dev@test.com",
-          password: "123456",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Dev login failed");
-      }
-
-      login(data.token, data.user);
-      navigate("/dashboard");
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f7f8f5] px-4">
       <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-gray-200 shadow-sm">
@@ -133,16 +101,6 @@ const Login = () => {
             className="w-full bg-[#10b981] hover:bg-[#059669] text-white py-2.5 rounded-xl font-medium transition-colors"
           >
             {loading ? "Logging in..." : "Login"}
-          </button>
-
-          {/* Dev Login Button */}
-          <button
-            type="button"
-            onClick={handleDevLogin}
-            disabled={loading}
-            className="w-full border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 py-2.5 rounded-xl font-medium transition-colors"
-          >
-            Dev Login
           </button>
         </form>
 
