@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 
 const Goals = () => {
   const [showModal, setShowModal] = useState(false);
@@ -8,20 +9,40 @@ const Goals = () => {
 
   const [target, setTarget] = useState("");
 
-  const [goals, setGoals] = useState(() => {
-    const saved = localStorage.getItem("goals");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [goals, setGoals] = useState([]);
 
   const [goalTitleError, setGoalTitleError] = useState("");
   const [goalTypeError, setGoalTypeError] = useState("");
   const [targetError, setTargetError] = useState("");
 
-  useEffect(() => {
-    localStorage.setItem("goals", JSON.stringify(goals));
-  }, [goals]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [goalToDelete, setGoalToDelete] = useState(null);
 
-  const addGoal = () => {
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
+  const fetchGoals = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/goals", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch goals");
+      }
+
+      setGoals(data);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+    }
+  };
+
+  const addGoal = async () => {
     setGoalTitleError("");
     setGoalTypeError("");
     setTargetError("");
@@ -45,26 +66,59 @@ const Goals = () => {
 
     if (!valid) return;
 
-    const newGoal = {
-      id: Date.now(),
-      title: goalTitle.trim(),
-      type: goalType,
-      target: Number(target),
-      progress: 0,
-      completed: false,
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/goals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          title: goalTitle.trim(),
+          type: goalType,
+          target: Number(target),
+        }),
+      });
 
-    setGoals((prev) => [...prev, newGoal]);
+      const data = await response.json();
 
-    setGoalTitle("");
-    setGoalType("");
-    setTarget("");
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create goal");
+      }
 
-    setShowModal(false);
+      setGoals((prevGoals) => [...prevGoals, data.goal]);
+
+      setGoalTitle("");
+      setGoalType("");
+      setTarget("");
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error creating goal:", error);
+    }
   };
 
-  const deleteGoal = (id) => {
-    setGoals((prev) => prev.filter((goal) => goal.id !== id));
+  const deleteGoal = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/goals/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete goal");
+      }
+
+      setGoals((prevGoals) => prevGoals.filter((goal) => goal._id !== id));
+
+      setShowDeleteConfirm(false);
+      setGoalToDelete(null);
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+    }
   };
 
   const resetForm = () => {
@@ -77,20 +131,39 @@ const Goals = () => {
     setShowModal(false);
   };
 
-  const increaseProgress = (id) => {
-    setGoals((prev) =>
-      prev.map((goal) => {
-        if (goal.id !== id) return goal;
+  const increaseProgress = async (id) => {
+    const goal = goals.find((goal) => goal._id === id);
 
-        const updatedProgress = goal.progress + 1;
+    if (!goal || goal.completed) return;
 
-        return {
-          ...goal,
+    const updatedProgress = goal.progress + 1;
+    const completed = updatedProgress >= goal.target;
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/goals/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
           progress: updatedProgress,
-          completed: updatedProgress >= goal.target,
-        };
-      }),
-    );
+          completed,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update goal");
+      }
+
+      setGoals((prevGoals) =>
+        prevGoals.map((goal) => (goal._id === id ? data.goal : goal)),
+      );
+    } catch (error) {
+      console.error("Error updating goal:", error);
+    }
   };
 
   const completedGoals = goals.filter((goal) => goal.completed).length;
@@ -253,13 +326,8 @@ const Goals = () => {
 
                     <button
                       onClick={() => {
-                        const confirmDelete = window.confirm(
-                          "Are you sure you want to delete this goal?",
-                        );
-
-                        if (confirmDelete) {
-                          deleteGoal(goal.id);
-                        }
+                        setGoalToDelete(goal);
+                        setShowDeleteConfirm(true);
                       }}
                       className="
           text-red-500
@@ -305,7 +373,7 @@ const Goals = () => {
                   </p>
 
                   <button
-                    onClick={() => increaseProgress(goal.id)}
+                    onClick={() => increaseProgress(goal._id)}
                     disabled={goal.completed}
                     className={`
         rounded-xl
@@ -471,6 +539,58 @@ const Goals = () => {
           "
               >
                 Add Goal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {showDeleteConfirm && goalToDelete && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 w-[95%] max-w-md shadow-xl relative">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setGoalToDelete(null);
+              }}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <h2 className="text-xl font-semibold text-slate-900">
+              Delete Goal?
+            </h2>
+
+            <p className="text-sm text-slate-600 mt-2">
+              Are you sure you want to permanently delete{" "}
+              <span className="font-medium text-slate-900">
+                "{goalToDelete.title}"
+              </span>
+              ?
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setGoalToDelete(null);
+                }}
+                className="px-4 py-2 rounded-xl border border-stone-200 text-slate-700 hover:bg-stone-50 transition-colors"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={() => deleteGoal(goalToDelete._id)}
+                className="px-4 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors"
+              >
+                Delete
               </button>
             </div>
           </div>

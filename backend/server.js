@@ -9,6 +9,7 @@ dotenv.config();
 const authRoutes = require("./routes/authRoutes");
 const testRoutes = require("./routes/testRoutes");
 const taskRoutes = require("./routes/taskRoutes");
+const goalRoutes = require("./routes/goalRoutes");
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/goals", goalRoutes);
 
 app.get("/", (req, res) => {
     res.json({
