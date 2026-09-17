@@ -135,6 +135,7 @@ The application helps students manage their academic life in one place — from 
                  └─────────────────────┘
 
 ## 📂 Project Structure
+```text
 
 smart-student-dashboard/
 │
@@ -185,7 +186,7 @@ smart-student-dashboard/
 ├── package.json
 └── README.md
 
-> `.env` files are excluded from Git using `.gitignore`.
+```
 
 
 ## 🚀 Getting Started
