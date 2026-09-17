@@ -14,7 +14,6 @@ const studySessionRoutes = require("./routes/studySessionRoutes");
 const semesterRoutes = require("./routes/semesterRoutes");
 const resourceRoutes = require("./routes/resourceRoutes");
 
-dotenv.config();
 
 connectDB();
 
