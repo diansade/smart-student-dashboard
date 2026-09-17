@@ -1,9 +1,33 @@
-import { useState } from "react";
-import { Search, Bell, Moon, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Bell, Moon, ChevronDown, User, LogOut } from "lucide-react";
 import { PiStudentBold } from "react-icons/pi";
 import { HiOutlineMenu } from "react-icons/hi";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
+  const { user, logout } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+  const profileMenuRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target)
+      ) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <header className="px-3 sm:px-4 lg:px-6 pt-3 lg:pt-4">
       <div
@@ -51,20 +75,44 @@ const Navbar = ({ sidebarOpen, setSidebarOpen }) => {
 
           {/* Profile */}
           <div className="flex items-center gap-2">
-            <div
-              className="
-              w-8 h-8 sm:w-9 sm:h-9
-              rounded-full
-              bg-emerald-100
-              flex items-center justify-center
-              font-semibold
-              text-emerald-700
-            "
-            >
-              D
-            </div>
+            <div ref={profileMenuRef} className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="flex items-center gap-2"
+              >
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-medium">
+                  {user?.name?.charAt(0).toUpperCase() || "D"}
+                </div>
 
-            <ChevronDown size={18} className="text-zinc-600" />
+                <ChevronDown size={18} className="text-zinc-600" />
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-3 w-52 bg-white rounded-2xl border border-stone-200 shadow-lg p-2 z-50">
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      navigate("/dashboard/profile");
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[#0f172a] hover:bg-emerald-50 transition-colors"
+                  >
+                    <User size={19} className="text-emerald-600" />
+                    <span className="font-medium">Profile</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      window.location.href = "/";
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut size={19} />
+                    <span className="font-medium">Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

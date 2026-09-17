@@ -6,15 +6,39 @@ import { getCGPA, getTotalCredits } from "../utils/cgpaUtils";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
-  const [goals, setGoals] = useState([]);
   const [studySessions, setStudySessions] = useState([]);
   const [semesters, setSemesters] = useState([]);
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    setTasks(JSON.parse(localStorage.getItem("tasks")) || []);
-    setGoals(JSON.parse(localStorage.getItem("goals")) || []);
-    setStudySessions(JSON.parse(localStorage.getItem("studySessions")) || []);
-    setSemesters(JSON.parse(localStorage.getItem("cgpa")) || []);
+    const fetchDashboardData = async () => {
+      try {
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+
+        const [tasksRes, studyRes, semestersRes] = await Promise.all([
+          fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/study-sessions`, {
+            headers,
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/semesters`, { headers }),
+        ]);
+
+        const tasksData = await tasksRes.json();
+        const studyData = await studyRes.json();
+        const semestersData = await semestersRes.json();
+
+        if (tasksRes.ok) setTasks(tasksData);
+        if (studyRes.ok) setStudySessions(studyData);
+        if (semestersRes.ok) setSemesters(semestersData);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+
+    fetchDashboardData();
   }, []);
 
   const completedTasks = tasks.filter((task) => task.completed).length;
@@ -175,38 +199,37 @@ flex-col
                 No pending tasks 🎉{" "}
               </div>
             ) : (
-              <div className="space-y-4" >
-               {todayTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="rounded-[1.5rem] border border-stone-200 bg-white p-5"
-                >
-                  {" "}
-                  <div className="flex items-center justify-between">
+              <div className="space-y-4">
+                {todayTasks.map((task) => (
+                  <div
+                    key={task._id}
+                    className="rounded-[1.5rem] border border-stone-200 bg-white p-5"
+                  >
                     {" "}
-                    <div>
+                    <div className="flex items-center justify-between">
                       {" "}
-                      <h3 className="font-medium text-zinc-800">
+                      <div>
                         {" "}
-                        {task.taskName}{" "}
-                      </h3>{" "}
-                      <p className="mt-1 text-sm text-zinc-500">
+                        <h3 className="font-medium text-zinc-800">
+                          {" "}
+                          {task.taskName}{" "}
+                        </h3>{" "}
+                        <p className="mt-1 text-sm text-zinc-500">
+                          {" "}
+                          {task.taskSubject || "No Subject"}{" "}
+                        </p>{" "}
+                      </div>{" "}
+                      <span
+                        className={`font-medium ${task.priority === "High" ? "text-orange-500" : task.priority === "Medium" ? "text-emerald-600" : "text-blue-500"}`}
+                      >
                         {" "}
-                        {task.taskSubject || "No Subject"}{" "}
-                      </p>{" "}
+                        {task.priority}{" "}
+                      </span>{" "}
                     </div>{" "}
-                    <span
-                      className={`font-medium ${task.priority === "High" ? "text-orange-500" : task.priority === "Medium" ? "text-emerald-600" : "text-blue-500"}`}
-                    >
-                      {" "}
-                      {task.priority}{" "}
-                    </span>{" "}
-                  </div>{" "}
-                </div>
-              ))}
+                  </div>
+                ))}
               </div>
-            )
-            }{" "}
+            )}{" "}
           </div>
           {/* View All Button */}
           <Link
