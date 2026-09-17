@@ -1,35 +1,47 @@
 import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
 
 const Tasks = () => {
+  const fetchTasks = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch tasks");
+      }
+
+      setTasks(data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
   const [showModal, setShowModal] = useState(false);
   const [taskName, setTaskName] = useState("");
   const [taskSubject, setTaskSubject] = useState("");
   const [priority, setPriority] = useState("");
   const [taskNameError, setTaskNameError] = useState("");
   const [priorityError, setPriorityError] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
-  const [tasks, setTasks] = useState(() => {
-    const savedTasks = localStorage.getItem("tasks");
-
-    return savedTasks ? JSON.parse(savedTasks) : [];
-  });
+  const [tasks, setTasks] = useState([]);
 
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [filter, setFilter] = useState("All");
-  const [archivedTasks, setArchivedTasks] = useState(() => {
-    const savedArchivedTasks = localStorage.getItem("archivedTasks");
-
-    return savedArchivedTasks ? JSON.parse(savedArchivedTasks) : [];
-  });
-  const [showArchive, setShowArchive] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
-  useEffect(() => {
-    localStorage.setItem("archivedTasks", JSON.stringify(archivedTasks));
-  }, [archivedTasks]);
 
   const resetForm = () => {
     setTaskName("");
@@ -44,20 +56,43 @@ const Tasks = () => {
     setShowModal(false);
   };
 
-  const toggleComplete = (id) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === id
-          ? {
-              ...task,
-              completed: !task.completed,
-            }
-          : task,
-      ),
-    );
+  const toggleComplete = async (id) => {
+    const task = tasks.find((task) => task._id === id || task.id === id);
+
+    if (!task) return;
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            completed: !task.completed,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update task");
+      }
+
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          (task._id || task.id) === id ? data.task : task,
+        ),
+      );
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
   };
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     let valid = true;
 
     setTaskNameError("");
@@ -77,44 +112,94 @@ const Tasks = () => {
     if (!valid) return;
 
     if (editingTaskId) {
-      // Update existing task
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === editingTaskId
-            ? {
-                ...task,
-                taskName: taskName.trim(),
-                taskSubject: taskSubject.trim(),
-                priority,
-              }
-            : task,
-        ),
-      );
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/tasks/${editingTaskId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({
+              taskName: taskName.trim(),
+              taskSubject: taskSubject.trim(),
+              priority,
+            }),
+          },
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to update task");
+        }
+
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === editingTaskId ? data.task : task,
+          ),
+        );
+      } catch (error) {
+        console.error("Error updating task:", error);
+        return;
+      }
     } else {
       // Add new task
-      const newTask = {
-        id: Date.now(),
-        taskName: taskName.trim(),
-        taskSubject: taskSubject.trim(),
-        priority,
-        completed: false,
-      };
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            taskName: taskName.trim(),
+            taskSubject: taskSubject.trim(),
+            priority,
+          }),
+        },
+      );
 
-      setTasks((prevTasks) => [...prevTasks, newTask]);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create task");
+      }
+
+      setTasks((prevTasks) => [...prevTasks, data.task]);
     }
 
     // Reset + close modal
     resetForm();
   };
 
-  const deleteTask = (id) => {
-    const taskToArchive = tasks.find((task) => task.id === id);
+  const deleteTask = async (id) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
-    if (taskToArchive) {
-      setArchivedTasks((prev) => [...prev, taskToArchive]);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete task");
+      }
+
+      setTasks((prevTasks) => prevTasks.filter((task) => task._id !== id));
+
+      setShowDeleteConfirm(false);
+      setTaskToDelete(null);
+    } catch (error) {
+      console.error("Error deleting task:", error);
     }
-
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
   };
 
   const handleEditTask = (task) => {
@@ -122,7 +207,7 @@ const Tasks = () => {
     setTaskSubject(task.taskSubject);
     setPriority(task.priority);
 
-    setEditingTaskId(task.id);
+    setEditingTaskId(task._id);
 
     setShowModal(true);
   };
@@ -139,20 +224,6 @@ const Tasks = () => {
     return true;
   });
 
-  const restoreTask = (id) => {
-    const taskToRestore = archivedTasks.find((task) => task.id === id);
-
-    if (taskToRestore) {
-      setTasks((prev) => [...prev, taskToRestore]);
-    }
-
-    setArchivedTasks((prev) => prev.filter((task) => task.id !== id));
-  };
-
-  const permanentlyDeleteTask = (id) => {
-    setArchivedTasks((prev) => prev.filter((task) => task.id !== id));
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -165,25 +236,9 @@ const Tasks = () => {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => setShowArchive(true)}
-            className="
-    rounded-2xl
-    bg-stone-100
-    px-5 py-3
-    font-medium
-    text-zinc-700
-    transition
-    hover:bg-stone-200
-    "
-          >
-            Archived
-          </button>
-
-          <button
-            onClick={() => setShowModal(true)}
-            className="
+        <button
+          onClick={() => setShowModal(true)}
+          className="
     rounded-2xl
     bg-emerald-500
     px-5 py-3
@@ -192,10 +247,9 @@ const Tasks = () => {
     transition
     hover:bg-emerald-600
     "
-          >
-            + Add Task
-          </button>
-        </div>
+        >
+          + Add Task
+        </button>
       </div>
 
       {/* Filters */}
@@ -260,7 +314,7 @@ const Tasks = () => {
         ) : (
           filteredTasks.map((task) => (
             <div
-              key={task.id}
+              key={task._id}
               className="
         rounded-[2rem]
         border border-stone-200
@@ -273,7 +327,7 @@ const Tasks = () => {
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => toggleComplete(task.id)}
+                    onChange={() => toggleComplete(task._id)}
                     className="mt-1 h-5 w-5"
                   />
 
@@ -332,7 +386,10 @@ const Tasks = () => {
                   </button>
 
                   <button
-                    onClick={() => deleteTask(task.id)}
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowDeleteConfirm(true);
+                    }}
                     className="
     text-zinc-400
     transition
@@ -536,109 +593,18 @@ const Tasks = () => {
           </div>
         </div>
       )}
-      {showArchive && (
-        <div
-          className="
-    fixed inset-0
-    bg-black/30
-    backdrop-blur-sm
-    flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center
-    z-50
-  "
-        >
-          <div
-            className="
-      w-[95%] max-w-2xl
-      rounded-[2rem]
-      bg-white
-      p-8
-      shadow-xl
-    "
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold text-zinc-800">
-                  Archived Tasks
-                </h2>
 
-                <p className="mt-1 text-sm text-zinc-500">
-                  Restore or permanently remove tasks
-                </p>
-              </div>
-
-              <button
-                onClick={() => setShowArchive(false)}
-                className="text-zinc-500 hover:text-zinc-800"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Archive List */}
-            <div className="mt-6 max-h-[400px] space-y-4 overflow-y-auto">
-              {archivedTasks.length === 0 ? (
-                <div className="rounded-[2rem] border border-dashed border-stone-300 p-8 text-center">
-                  <p className="text-zinc-500">No archived tasks</p>
-                </div>
-              ) : (
-                archivedTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="
-              rounded-[1.5rem]
-              border border-stone-200
-              bg-stone-50
-              p-5
-              flex items-center justify-between
-            "
-                  >
-                    <div>
-                      <h3 className="font-medium text-zinc-800">
-                        {task.taskName}
-                      </h3>
-
-                      {task.taskSubject && (
-                        <p className="mt-1 text-sm text-zinc-500">
-                          {task.taskSubject}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => restoreTask(task.id)}
-                        className="
-                  rounded-xl
-                  bg-emerald-100
-                  px-4 py-2
-                  text-sm
-                  text-emerald-700
-                "
-                      >
-                        Restore
-                      </button>
-
-                      <button
-                        onClick={() => permanentlyDeleteTask(task.id)}
-                        className="
-                  rounded-xl
-                  bg-red-100
-                  px-4 py-2
-                  text-sm
-                  text-red-700
-                "
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Modal */}
+      <DeleteConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete Task?"
+        itemName={taskToDelete?.taskName}
+        onCancel={() => {
+          setShowDeleteConfirm(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={() => deleteTask(taskToDelete._id)}
+      />
     </div>
   );
 };

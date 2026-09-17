@@ -9,12 +9,6 @@ function AppLayout() {
     <div className="min-h-screen bg-[#F5F5F0]">
       {/* Navbar */}
       <Navbar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden"
-        />
-      )}
 
       {/* Main Layout */}
       <div className="flex p-4 lg:p-6 gap-6 relative">
