@@ -22,11 +22,14 @@ const StudyTracker = () => {
 
   const fetchSessions = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/study-sessions", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/study-sessions`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       const data = await response.json();
 
@@ -65,17 +68,20 @@ const StudyTracker = () => {
     if (!valid) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/study-sessions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/study-sessions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            subject: subject.trim(),
+            minutes: totalMinutes,
+          }),
         },
-        body: JSON.stringify({
-          subject: subject.trim(),
-          minutes: totalMinutes,
-        }),
-      });
+      );
 
       const data = await response.json();
 
@@ -97,7 +103,7 @@ const StudyTracker = () => {
   const deleteSession = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/study-sessions/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/study-sessions/${id}`,
         {
           method: "DELETE",
           headers: {

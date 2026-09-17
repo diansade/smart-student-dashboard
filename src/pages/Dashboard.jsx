@@ -19,9 +19,11 @@ const Dashboard = () => {
         };
 
         const [tasksRes, studyRes, semestersRes] = await Promise.all([
-          fetch("http://localhost:5000/api/tasks", { headers }),
-          fetch("http://localhost:5000/api/study-sessions", { headers }),
-          fetch("http://localhost:5000/api/semesters", { headers }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/tasks`, { headers }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/study-sessions`, {
+            headers,
+          }),
+          fetch(`${import.meta.env.VITE_API_URL}/api/semesters`, { headers }),
         ]);
 
         const tasksData = await tasksRes.json();

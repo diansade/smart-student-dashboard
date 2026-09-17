@@ -22,11 +22,14 @@ const Resources = () => {
   useEffect(() => {
     const fetchResources = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/resources", {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/resources`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         const data = await response.json();
 
@@ -60,17 +63,20 @@ const Resources = () => {
     if (!valid) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/resources", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/resources`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: resourceTitle.trim(),
+            link: resourceLink.trim(),
+          }),
         },
-        body: JSON.stringify({
-          title: resourceTitle.trim(),
-          link: resourceLink.trim(),
-        }),
-      });
+      );
 
       const data = await response.json();
 
@@ -90,7 +96,7 @@ const Resources = () => {
   const deleteResource = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/resources/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/resources/${id}`,
         {
           method: "DELETE",
           headers: {

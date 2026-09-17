@@ -23,7 +23,7 @@ const CGPA = () => {
   useEffect(() => {
     const fetchSemesters = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/semesters", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/semesters`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -76,7 +76,7 @@ const CGPA = () => {
     if (!valid) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/semesters", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/semesters`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +107,7 @@ const CGPA = () => {
   const deleteSemester = async (id) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/semesters/${id}`,
+       `${import.meta.env.VITE_API_URL}/api/semesters/${id}`,
         {
           method: "DELETE",
           headers: {

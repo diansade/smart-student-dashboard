@@ -5,11 +5,14 @@ import DeleteConfirmModal from "../components/ui/DeleteConfirmModal";
 const Tasks = () => {
   const fetchTasks = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/tasks", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       const data = await response.json();
 
@@ -59,16 +62,19 @@ const Tasks = () => {
     if (!task) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/tasks/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            completed: !task.completed,
+          }),
         },
-        body: JSON.stringify({
-          completed: !task.completed,
-        }),
-      });
+      );
 
       const data = await response.json();
 
@@ -108,7 +114,7 @@ const Tasks = () => {
     if (editingTaskId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/tasks/${editingTaskId}`,
+          `${import.meta.env.VITE_API_URL}/api/tasks/${editingTaskId}`,
           {
             method: "PUT",
             headers: {
@@ -140,18 +146,21 @@ const Tasks = () => {
       }
     } else {
       // Add new task
-      const response = await fetch("http://localhost:5000/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            taskName: taskName.trim(),
+            taskSubject: taskSubject.trim(),
+            priority,
+          }),
         },
-        body: JSON.stringify({
-          taskName: taskName.trim(),
-          taskSubject: taskSubject.trim(),
-          priority,
-        }),
-      });
+      );
 
       const data = await response.json();
 
@@ -168,12 +177,15 @@ const Tasks = () => {
 
   const deleteTask = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/tasks/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/tasks/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       const data = await response.json();
 

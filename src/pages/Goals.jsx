@@ -25,11 +25,14 @@ const Goals = () => {
 
   const fetchGoals = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/goals", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/goals`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       const data = await response.json();
 
@@ -68,18 +71,21 @@ const Goals = () => {
     if (!valid) return;
 
     try {
-      const response = await fetch("http://localhost:5000/api/goals", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/goals`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            title: goalTitle.trim(),
+            type: goalType,
+            target: Number(target),
+          }),
         },
-        body: JSON.stringify({
-          title: goalTitle.trim(),
-          type: goalType,
-          target: Number(target),
-        }),
-      });
+      );
 
       const data = await response.json();
 
@@ -100,12 +106,15 @@ const Goals = () => {
 
   const deleteGoal = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/goals/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/goals/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       const data = await response.json();
 
@@ -141,17 +150,20 @@ const Goals = () => {
     const completed = updatedProgress >= goal.target;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/goals/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/goals/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            progress: updatedProgress,
+            completed,
+          }),
         },
-        body: JSON.stringify({
-          progress: updatedProgress,
-          completed,
-        }),
-      });
+      );
 
       const data = await response.json();
 
